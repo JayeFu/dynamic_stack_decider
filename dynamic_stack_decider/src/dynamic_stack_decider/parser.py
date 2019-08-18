@@ -1,7 +1,7 @@
 import copy
 import re
 from dynamic_stack_decider.tree import Tree, AbstractTreeElement, DecisionTreeElement, ActionTreeElement, \
-    SequenceTreeElement
+    SequenceTreeElement, SelectorTreeElement
 
 
 class DSDParser:
@@ -106,6 +106,12 @@ class DSDParser:
                             element = self.create_sequence_element(actions, current_tree_element)
                             current_tree_element.add_child_element(element, result)
 
+                        elif re.search(r'\s*;\s*', call):
+                            #A selector element
+                            actions = re.split(r'\s*,\s*', call)
+                            element = self.create_selector_element(actions, current_tree_element)
+                            current_tree_element.add_child_element(element, result)
+
                         elif call.startswith('@'):
                             # An action is called
                             element = self.create_tree_element(call, current_tree_element)
@@ -163,6 +169,14 @@ class DSDParser:
             sequence_element.add_action_element(element)
         return sequence_element
 
+    def create_selector_element(self, actions, parent):
+        selector_element = SelectorTreeElement(parent)
+        for action in actions:
+            element = self.create_tree_element(action, selector_element)
+            if not isinstance(element, ActionTreeElement):
+                raise ParseError('In a sequence, only actions are allowed!')
+            selector_element.add_action_element(element)
+        return selector_element
 
 class ParseError(AssertionError):
     pass

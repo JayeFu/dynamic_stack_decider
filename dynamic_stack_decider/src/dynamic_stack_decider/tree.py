@@ -1,4 +1,5 @@
-from typing import List
+# from typing import List
+# No need to import list, may be deprecated use
 
 class Tree:
     """ A tree defining a behaviour, parsed from a .dsd file """
@@ -71,7 +72,7 @@ class DecisionTreeElement(AbstractTreeElement):
 class SequenceTreeElement(AbstractTreeElement):
     """
     A tree element describing a sequence of actions. Each action
-    has optional parameters that will be passwd to the module on
+    has optional parameters that will be passed to the module on
     creation
     """
     def __init__(self, parent):
@@ -90,6 +91,25 @@ class SequenceTreeElement(AbstractTreeElement):
     def __repr__(self):
         return '({})'.format(', '.join(repr(action) for action in self.action_elements))
 
+class SelectorTreeElement(AbstractTreeElement):
+    """
+    A tree element describing a selector of its child actions. Each
+    action has optional that will be passed to the module on creation
+    """
+    def __init__(self, parent):
+        AbstractTreeElement.__init__(self, None, parent)
+        self.action_elements = list() # type: List[ActionTreeElement]
+
+    def add_action_element(self, action_element):
+        action_element.activation_reason = self.activation_reason
+        self.action_elements.append(action_element)
+
+    def set_activation_reason(self, reason):
+        self.activation_reason = reason
+        for action in self.action_elements:
+            action.set_activation_reason(reason)
+    def __repr__(self):
+        return '({})'.format(', '.join(repr(action) for action in self.action_elements))
 
 class ActionTreeElement(AbstractTreeElement):
     """

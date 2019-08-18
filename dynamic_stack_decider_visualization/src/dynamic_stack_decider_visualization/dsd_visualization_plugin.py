@@ -248,8 +248,8 @@ class DsdVizPlugin(Plugin):
             if i['display_name'] == name:
                 dsd_data = i
                 break
-        else:
-            raise ValueError('no dsd with name {} found'.format(name))
+        	else:
+            	raise ValueError('no dsd with name {} found'.format(name))
 
         # Figure out full paths with the help of rospkg
         rospack = rospkg.RosPack()

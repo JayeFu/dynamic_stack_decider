@@ -10,9 +10,10 @@ from dynamic_stack_decider.abstract_action_element import AbstractActionElement
 from dynamic_stack_decider.abstract_decision_element import AbstractDecisionElement
 from dynamic_stack_decider.sequence_element import SequenceElement
 from dynamic_stack_decider.abstract_stack_element import AbstractStackElement
+from dynamic_stack_decider.selector_element import SelectorElement
 from dynamic_stack_decider.parser import DSDParser
 from dynamic_stack_decider.tree import Tree, AbstractTreeElement, ActionTreeElement, DecisionTreeElement, \
-    SequenceTreeElement
+    SequenceTreeElement, SelectorTreeElement
 
 
 def discover_elements(path):
@@ -134,6 +135,9 @@ class DSD:
         elif isinstance(element, SequenceTreeElement):
             for action in element.action_elements:
                 self._bind_modules(action)
+        elif isinstance(element, SelectorTreeElement):
+            for action in element.action_elements:
+                self._bind_modules(action)
         else:
             raise KeyError('Provided element ' + str(element) + 'was not found in registered actions or decisions')
 
@@ -144,6 +148,11 @@ class DSD:
             for action in element.action_elements:
                 initialized_actions.append(action.module(self.blackboard, self, action.parameters))
             return SequenceElement(self.blackboard, self, initialized_actions)
+        elif isinstance(element, SelectorTreeElement):
+            initialized_actions = list()
+            for action in element.action_elements:
+                initialized_actions.append(action.module(self.blackboard, self, action.parameters))
+            return SelectorElement(self.blackboard, self, initialized_actions)
         else:
             return element.module(self.blackboard, self, parameters)
 
@@ -194,6 +203,7 @@ class DSD:
 
                     if not self.stack_reevaluate:
                         # We had some external interrupt, we stop here
+                        # stack_reevaluate indicates that the stack is executing reevaluate right now
                         return
                 self.stack_exec_index += 1
             self.stack_reevaluate = False
